@@ -48,8 +48,8 @@ namespace Emby.Notifications.Discord
 
             options.TryGetValue("AvatarUrl", out string AvatarUrl);
             options.TryGetValue("Username", out string Username);
-            options.TryGetValue("EmbedColor", out string EmbedColor);
             options.TryGetValue("MentionType", out string MentionType);
+            options.TryGetValue("Url", out string Url);
 
             var discordMessage = new DiscordMessage
             {
@@ -59,7 +59,6 @@ namespace Emby.Notifications.Discord
                         {
                             new DiscordEmbed()
                             {
-                                color = DiscordWebhookHelper.FormatColorCode(EmbedColor),
                                 title = requestName,
                                 description = request.Description,
                                 footer = new Footer
@@ -81,7 +80,7 @@ namespace Emby.Notifications.Discord
                 discordMessage.content = "@here";
             }
 
-            return DiscordWebhookHelper.ExecuteWebhook(discordMessage, request.Url, _jsonSerializer, _httpClient, cancellationToken);
+            return DiscordWebhookHelper.ExecuteWebhook(discordMessage, Url, _jsonSerializer, _httpClient, cancellationToken);
         }
     }
 }

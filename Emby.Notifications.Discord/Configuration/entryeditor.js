@@ -7,20 +7,18 @@
     EntryEditor.setObjectValues = function (context, entry) {
 
         entry.FriendlyName = context.querySelector('.txtFriendlyName').value;
-        entry.Url = context.querySelector('.txtDiscordWebhookUri').value;
+        entry.Options.Url = context.querySelector('.txtDiscordWebhookUri').value;
         entry.Options.AvatarUrl = context.querySelector('.txtAvatarUrl').value;
         entry.Options.Username = context.querySelector('.txtUsername').value;
-        entry.Options.EmbedColor = context.querySelector('.txtEmbedColor').value;
         entry.Options.MentionType = context.querySelector('.mentionType').value;
     };
 
     EntryEditor.setFormValues = function (context, entry) {
 
         context.querySelector('.txtFriendlyName').value = entry.FriendlyName || '';
-        context.querySelector('.txtDiscordWebhookUri').value = entry.Url || '';
+        context.querySelector('.txtDiscordWebhookUri').value = entry.Options.Url || '';
         context.querySelector('.txtAvatarUrl').value = entry.Options.AvatarUrl || '';
         context.querySelector('.txtUsername').value = entry.Options.Username || '';
-        context.querySelector('.txtEmbedColor').value = entry.Options.EmbedColor || '';
         context.querySelector('.mentionType').value = entry.Options.MentionType || '';
     };
 
