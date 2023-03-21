@@ -5,24 +5,21 @@ using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
-using Emby.Notifications.Discord.Configuration;
 using MediaBrowser.Model.Drawing;
 using System.IO;
 
 namespace Emby.Notifications.Discord
 {
-    public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IHasThumbImage, IHasTranslations
+    public class Plugin : BasePlugin, IHasWebPages, IHasThumbImage, IHasTranslations
     {
-        public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer)
-            : base(applicationPaths, xmlSerializer)
-        {
-            Instance = this;
-        }
-
         public override string Name
         {
-            get { return "DiscordNotifications"; }
+            get { return StaticName; }
         }
+
+        public static string StaticName = "Discord";
+
+        private const string EditorJsName = "discordnotificationeditorjs";
 
         public IEnumerable<PluginPageInfo> GetPages()
         {
@@ -30,16 +27,19 @@ namespace Emby.Notifications.Discord
             {
                 new PluginPageInfo
                 {
-                    Name = Name,
-                    EmbeddedResourcePath = GetType().Namespace + ".Configuration.config.html"
+                    Name = EditorJsName,
+                    EmbeddedResourcePath = GetType().Namespace + ".Configuration.entryeditor.js"
                 },
                 new PluginPageInfo
                 {
-                    Name = $"{Name}JS",
-                    EmbeddedResourcePath = GetType().Namespace + ".Configuration.config.js"
+                    Name = "discordeditortemplate",
+                    EmbeddedResourcePath = GetType().Namespace + ".Configuration.entryeditor.template.html",
+                    IsMainConfigPage = false
                 }
             };
         }
+
+        public string NotificationSetupModuleUrl => GetPluginPageUrl(EditorJsName);
 
         public TranslationInfo[] GetTranslations()
         {
@@ -84,7 +84,5 @@ namespace Emby.Notifications.Discord
                 return ImageFormat.Jpg;
             }
         }
-
-        public static Plugin Instance { get; private set; }
     }
 }

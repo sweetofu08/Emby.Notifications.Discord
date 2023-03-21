@@ -2,10 +2,12 @@
 using MediaBrowser.Model.Serialization;
 using System.Collections.Generic;
 using System.Net;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Text;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using MediaBrowser.Common.Net;
 
 namespace Emby.Notifications.Discord
 {
@@ -54,27 +56,22 @@ namespace Emby.Notifications.Discord
             return int.Parse(hexCode.Substring(1, 6), System.Globalization.NumberStyles.HexNumber);
         }
 
-        public static async Task ExecuteWebhook(DiscordMessage message, string webhookUrl, IJsonSerializer _jsonSerializer)
+        public static async Task ExecuteWebhook(DiscordMessage message, string webhookUrl, IJsonSerializer _jsonSerializer, IHttpClient httpClient, CancellationToken cancellationToken)
         {
-            try
+            var bytes = Encoding.UTF8.GetBytes(_jsonSerializer.SerializeToString(message));
+
+            var httpRequestOptions = new HttpRequestOptions
             {
-                byte[] bytes = Encoding.UTF8.GetBytes(_jsonSerializer.SerializeToString(message));
+                Url = webhookUrl,
+                CancellationToken = cancellationToken
+            };
 
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(webhookUrl);
-                request.Method = "POST";
-                request.ContentType = "application/json";
-                request.ContentLength = bytes.Length;
-                using (Stream requestData = request.GetRequestStream())
-                {
-                    requestData.Write(bytes, 0, bytes.Count());
-                }
+            httpRequestOptions.RequestContentBytes = bytes;
+            httpRequestOptions.RequestContentType = "application/json";
 
-                HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
-
-                response.Dispose();
-            } catch (Exception e)
+            using (await httpClient.Post(httpRequestOptions).ConfigureAwait(false))
             {
-                throw e;
+
             }
         }
     }
