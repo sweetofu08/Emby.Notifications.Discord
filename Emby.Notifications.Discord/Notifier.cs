@@ -51,6 +51,14 @@ namespace Emby.Notifications.Discord
             options.TryGetValue("MentionType", out string MentionType);
             options.TryGetValue("Url", out string Url);
 
+            var description = request.Description;
+
+            // empty bodies are not allowed apparently
+            if (string.IsNullOrEmpty(description))
+            {
+                description = request.Item?.Name ?? "Emby Server Notification";
+            }
+
             var discordMessage = new DiscordMessage
             {
                 avatar_url = AvatarUrl,
@@ -60,7 +68,7 @@ namespace Emby.Notifications.Discord
                             new DiscordEmbed()
                             {
                                 title = requestName,
-                                description = request.Description,
+                                description = description,
                                 footer = new Footer
                                 {
                                     icon_url = AvatarUrl,
