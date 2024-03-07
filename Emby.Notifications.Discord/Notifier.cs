@@ -88,6 +88,16 @@ namespace Emby.Notifications.Discord
                 discordMessage.content = "@here";
             }
 
+            string imageUrl = null;
+
+            if (!string.IsNullOrEmpty(imageUrl))
+            {
+                discordMessage.embeds[0].thumbnail = new Thumbnail
+                {
+                    url = imageUrl
+                };
+            }
+
             return DiscordWebhookHelper.ExecuteWebhook(discordMessage, Url, _jsonSerializer, _httpClient, cancellationToken);
         }
     }
