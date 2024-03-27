@@ -22,8 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="mediabrowser.server.core" Version="4.8.0.20-beta10" />
-    <PackageReference Include="System.Memory" Version="4.5.3" />
+    <PackageReference Include="mediabrowser.server.core" Version="4.9.0.12-beta" />
+    <PackageReference Include="System.Memory" Version="4.5.5" />
   </ItemGroup>
 
 </Project>

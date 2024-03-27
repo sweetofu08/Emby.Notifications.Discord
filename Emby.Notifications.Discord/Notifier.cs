@@ -11,6 +11,7 @@ using Emby.Notifications;
 using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Controller;
 using MediaBrowser.Model.Serialization;
+using MediaBrowser.Model.IO;
 
 namespace Emby.Notifications.Discord
 {
@@ -20,13 +21,15 @@ namespace Emby.Notifications.Discord
         private IServerApplicationHost _appHost;
         private IHttpClient _httpClient;
         private IJsonSerializer _jsonSerializer;
+        private IFileSystem _fileSystem;
 
-        public Notifier(ILogger logger, IServerApplicationHost applicationHost, IHttpClient httpClient, IJsonSerializer jsonSerializer)
+        public Notifier(ILogger logger, IServerApplicationHost applicationHost, IHttpClient httpClient, IJsonSerializer jsonSerializer, IFileSystem fileSystem)
         {
             _logger = logger;
             _appHost = applicationHost;
             _httpClient = httpClient;
             _jsonSerializer = jsonSerializer;
+            _fileSystem = fileSystem;
         }
 
         private Plugin Plugin => _appHost.Plugins.OfType<Plugin>().First();
@@ -88,7 +91,27 @@ namespace Emby.Notifications.Discord
                 discordMessage.content = "@here";
             }
 
+            // image example
+            // first get an image
+
+            // get a series or album image if available, otherwise, the image from the media
+            var image = request.GetSeriesImageInfo(MediaBrowser.Model.Entities.ImageType.Primary)
+                ?? request.GetSeriesImageInfo(MediaBrowser.Model.Entities.ImageType.Thumb)
+                ?? request.GetImageInfo(MediaBrowser.Model.Entities.ImageType.Primary);
+
             string imageUrl = null;
+
+            if (image != null)
+            {
+                // if the raw bytes are needed
+                // var bytes = await _fileSystem.ReadAllBytesAsync(image.ImageInfo.Path).ConfigureAwait(false);
+
+                // or if an image url is needed
+                imageUrl = image.GetRemoteApiImageUrl(new ApiImageOptions
+                {
+                    Format = "jpg"
+                });
+            }
 
             if (!string.IsNullOrEmpty(imageUrl))
             {
