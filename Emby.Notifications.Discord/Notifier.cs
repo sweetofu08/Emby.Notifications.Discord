@@ -40,7 +40,7 @@ namespace Emby.Notifications.Discord
 
         public string SetupModuleUrl => Plugin.NotificationSetupModuleUrl;
 
-        public Task SendNotification(InternalNotificationRequest request, CancellationToken cancellationToken)
+        public async Task SendNotification(InternalNotificationRequest request, CancellationToken cancellationToken)
         {
             var options = request.Configuration.Options;
 
@@ -107,10 +107,11 @@ namespace Emby.Notifications.Discord
                 // var bytes = await _fileSystem.ReadAllBytesAsync(image.ImageInfo.Path).ConfigureAwait(false);
 
                 // or if an image url is needed
-                imageUrl = image.GetRemoteApiImageUrl(new ApiImageOptions
+                imageUrl = await image.GetRemoteApiImageUrl(new ApiImageOptions
                 {
                     Format = "jpg"
-                });
+
+                }, cancellationToken).ConfigureAwait(false);
             }
 
             if (!string.IsNullOrEmpty(imageUrl))
@@ -121,7 +122,7 @@ namespace Emby.Notifications.Discord
                 };
             }
 
-            return DiscordWebhookHelper.ExecuteWebhook(discordMessage, Url, _jsonSerializer, _httpClient, cancellationToken);
+            await DiscordWebhookHelper.ExecuteWebhook(discordMessage, Url, _jsonSerializer, _httpClient, cancellationToken).ConfigureAwait(false);
         }
     }
 }
