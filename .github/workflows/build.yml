@@ -1,0 +1,53 @@
+name: Build Emby.Notifications.Discord
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  # If the .csproj is not in the repo root, set the relative path here.
+  # Example guesses (pick the one that exists in your fork):
+  # PROJECT_PATH: "Emby.Notifications.Discord/Emby.Notifications.Discord.csproj"
+  # PROJECT_PATH: "src/Emby.Notifications.Discord/Emby.Notifications.Discord.csproj"
+  PROJECT_PATH: "Emby.Notifications.Discord.csproj"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 6 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Restore
+        run: dotnet restore "${{ env.PROJECT_PATH }}"
+
+      - name: Build (Release)
+        run: dotnet build "${{ env.PROJECT_PATH }}" -c Release --no-restore
+
+      - name: Collect DLLs
+        shell: bash
+        run: |
+          mkdir -p out
+          # Grab ONLY the plugin DLL(s) built for Release
+          find . -path "*/bin/Release/*" -name "*.dll" -print -exec cp {} ./out/ \;
+          # Optional: also include plugin.json if present
+          if [ -f "plugin.json" ]; then cp plugin.json ./out/; fi
+          # Zip for convenience
+          (cd out && zip -r ../Emby.Notifications.Discord_Release.zip .)
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Emby.Notifications.Discord_Release
+          path: |
+            Emby.Notifications.Discord_Release.zip
+            out/*.dll
+            out/plugin.json
